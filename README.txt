@@ -8,6 +8,7 @@ media sites. The data which is saved per node includes data from:
 2. Twitter     : tweets count.
 3. LinkedIn    : share count.
 4. Google Plus : plus one count
+5. Total Social: Facebook + Twitter + LinkeIn + Google Plus
 
 ------------------------
 MODULE STRUCTURE
@@ -36,8 +37,8 @@ INSTALLATION
 1. Clone the git repo into directory where you keep contributed modules
    (e.g. sites/all/modules/).
 
-2. Enable the Social Stats module on the Modules list page.  The database
-   tables will be created automagically for you at this point.
+2. Enable the Social Stats module on the Modules list page. Appropriate
+   tables will be created in the background.
 
 3. Modify permissions on the People >> Permissions page.
 

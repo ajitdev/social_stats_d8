@@ -59,7 +59,6 @@ function social_stats_permission() {
  * Implements hook_cron().
  */
 function social_stats_cron() {
-  global $base_url;
   // Get list of content types in the site.
   $node_types = node_type_get_types();
   $content_types = array();
@@ -85,18 +84,17 @@ function social_stats_cron() {
     $linkedin_shares = 0;
     $google_plusone = 0;
     $variable = variable_get($result->type);
-    $node_path = $base_url . '/' . drupal_get_path_alias('node/' . $result->nid);
+    $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
 
     // Getting data from Facebook for nodes of the selected node type.
     if ($variable['Facebook']) {
       // Write a query to fetch the data from Facebook.
       $fql_query = 'http://api.facebook.com/method/fql.query?query=select';
-      $fql_query .= '%20share_count,%20like_count,%20total_count,%20';
-      $fql_query .= 'comment_count%20from%20link_stat%20where%20url=%22';
-      $fql_query .= $node_path . '%22&format=json';
+      $fql_query .= ' share_count, like_count, total_count, ';
+      $fql_query .= 'comment_count from link_stat where url=\'';
+      $fql_query .= $node_path . '\'&format=json';
       $fql_response = drupal_http_request($fql_query);
       $facebook_data = json_decode($fql_response->data);
-      dsm($facebook_data);
       db_merge('social_stats_facebook')
       ->key(array('nid' => $result->nid))
       ->fields(array(
