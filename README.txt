@@ -8,7 +8,7 @@ media sites. The data which is saved per node includes data from:
 2. Twitter     : tweets count.
 3. LinkedIn    : share count.
 4. Google Plus : plus one count
-5. Total Social: Facebook + Twitter + LinkeIn + Google Plus
+5. Total Count: Facebook + Twitter + LinkeIn + Google Plus
 
 ------------------------
 MODULE STRUCTURE
