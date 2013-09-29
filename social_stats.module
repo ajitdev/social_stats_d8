@@ -144,30 +144,38 @@ function social_stats_cron() {
 
     // Getting data from Google Plus for nodes of selected node type.
     if ($variable['Google Plus']) {
-      $google_query = '[{"method":"pos.plusones.get","id":"p"';
-      $google_query .= ',"params":{"nolog":true,"id":"' . $node_path;
-      $google_query .= '","source":"widget","userId":"@viewer"';
-      $google_query .= ',"groupId":"@self"},"jsonrpc":"2.0",';
-      $google_query .= '"key":"p","apiVersion":"v1"}]';
-      $query_content_type = array('Content-type: application/json');
-      $curl = curl_init();
-      curl_setopt($curl, CURLOPT_URL, "https://clients6.google.com/rpc");
-      curl_setopt($curl, CURLOPT_POST, 1);
-      curl_setopt($curl, CURLOPT_POSTFIELDS, $google_query);
-      curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-      curl_setopt($curl, CURLOPT_HTTPHEADER, $query_content_type);
-      $curl_results = curl_exec($curl);
-      curl_close($curl);
-      $json = json_decode($curl_results, TRUE);
-      $gplus_data = $json[0]['result']['metadata']['globalCounts']['count'];
-      db_merge('social_stats_gplus')
-      ->key(array('nid' => $result->nid))
-      ->fields(array(
-        'node_type' => $result->type,
-        'plusone' => $gplus_data,
-      ))
-      ->execute();
-      $google_plusone = $gplus_data;
+      // Build the JSON data for the API request.
+      $data['method'] = 'pos.plusones.get';
+      $data['id'] = 'p';
+      $data['params']['nolog'] = TRUE;
+      $data['params']['id'] = $node_path;
+      $data['params']['source'] = 'widget';
+      $data['params']['userId'] = '@viewer';
+      $data['params']['groupId'] = '@self';
+      $data['jsonrpc'] = '2.0';
+      $data['key'] = 'p';
+      $data['apiVersion'] = 'v1';
+
+      $url = 'https://clients6.google.com/rpc?key=AIzaSyCKSbrvQasunBoV16zDH9R33D88CeLr9gQ';
+      $options['data'] = json_encode($data);
+      $options['method'] = 'POST';
+      $options['headers']['Content-Type'] = 'application/json';
+
+      $request = drupal_http_request($url, $options);
+      if (empty($request->error) && !empty($request->data)) {
+        $request->data = json_decode($request->data);
+        if (isset($request->data->result->metadata->globalCounts->count)) {
+          $gplus_count = $request->data->result->metadata->globalCounts->count;
+          db_merge('social_stats_gplus')
+            ->key(array('nid' => $result->nid))
+            ->fields(array(
+              'node_type' => $result->type,
+              'plusone' => $gplus_count,
+            ))
+            ->execute();
+          $google_plusone = $gplus_count;
+        }
+      }
     }
 
     $count_total = $facebook_total + $twitter_shares;
