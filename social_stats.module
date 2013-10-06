@@ -21,18 +21,7 @@ function social_stats_help($path, $arg) {
  * Implements hook_menu().
  */
 function social_stats_menu() {
-  $items = array();
-  $items['admin/config/social-stats'] = array(
-    'title' => 'Social Statistics',
-    'description' => 'Settings for Social Stats module',
-    'weight' => 10,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('Administer Social Stats'),
-    'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
-  );
-
-  $items['admin/config/social-stats/settings'] = array(
+  $items['admin/config/services/social-stats/settings'] = array(
     'title' => 'Social Statistics',
     'description' => 'Administrative settings for social stats module',
     'page callback' => 'drupal_get_form',
@@ -56,6 +45,63 @@ function social_stats_permission() {
 }
 
 /**
+ * Fetch the data from Facebook and save it to local table.
+ *
+ * @param array $node
+ *   Contains $node->nid.
+ * @param string $node_path
+ *   The URL alias.
+ */
+function _social_stats_facebook($node, $node_path = '') {
+  $facebook_total = 0;
+
+  $fql_query  = 'SELECT share_count, like_count, comment_count, total_count ';
+  $fql_query .= "FROM link_stat WHERE url='" . $node_path . "'";
+
+  // TODO: Implement multi-query
+  // https://developers.facebook.com/docs/technical-guides/fql/
+  $fql_queries = array('query1' => $fql_query);
+  $params = array(
+    'q' => json_encode($fql_queries),
+    'format' => 'json',
+    // 'access_token' => $access_token
+  );
+
+  $request_url = 'https://graph.facebook.com/fql?' . http_build_query($params);
+
+  $fql_response = @drupal_http_request($request_url);
+
+
+  if (!empty($fql_response->error)) {
+    watchdog(t('Social Stats'),
+      'Problem updating data from Facebook for %node_path. Error: %err',
+      array('%node_path' => $node_path, '%err' => $fql_response->error),
+      NULL, WATCHDOG_ERROR);
+  }
+  else {
+    $fql_data = json_decode($fql_response->data);
+    foreach ($fql_data->data as $fql_data_row) {
+      $facebook_data = $fql_data_row->fql_result_set;
+      // Only update table if counter > 0
+      if (intval($facebook_data[0]->total_count)) {
+        db_merge('social_stats_facebook')
+        ->key(array('nid' => $node->nid))
+        ->fields(array(
+          'node_type' => $node->type,
+          'fb_likes' => intval($facebook_data[0]->like_count),
+          'fb_shares' => intval($facebook_data[0]->share_count),
+          'fb_comments' => intval($facebook_data[0]->comment_count),
+          'fb_total' => intval($facebook_data[0]->total_count),
+        ))
+        ->execute();
+        return $facebook_data[0]->total_count;
+      }
+      return 0;
+    }
+  }
+}
+
+/**
  * Implements hook_cron().
  */
 function social_stats_cron() {
@@ -76,7 +122,7 @@ function social_stats_cron() {
   // which has atleast one social media selected.
   $query = db_select('node', 'n')
             ->fields('n', array('nid', 'type'))
-            ->condition('n.type', $content_types)
+            ->condition('n.type', empty($content_types) ? '0' : $content_types)
             ->execute();
   while ($result = $query->fetchObject()) {
     $facebook_total = 0;
@@ -88,24 +134,7 @@ function social_stats_cron() {
 
     // Getting data from Facebook for nodes of the selected node type.
     if ($variable['Facebook']) {
-      // Write a query to fetch the data from Facebook.
-      $fql_query = 'http://api.facebook.com/method/fql.query?query=select';
-      $fql_query .= ' share_count, like_count, total_count, ';
-      $fql_query .= 'comment_count from link_stat where url=\'';
-      $fql_query .= $node_path . '\'&format=json';
-      $fql_response = drupal_http_request($fql_query);
-      $facebook_data = json_decode($fql_response->data);
-      db_merge('social_stats_facebook')
-      ->key(array('nid' => $result->nid))
-      ->fields(array(
-        'node_type' => $result->type,
-        'fb_likes' => intval($facebook_data[0]->like_count),
-        'fb_shares' => intval($facebook_data[0]->share_count),
-        'fb_comments' => intval($facebook_data[0]->comment_count),
-        'fb_total' => intval($facebook_data[0]->total_count),
-      ))
-      ->execute();
-      $facebook_total = $facebook_data[0]->total_count;
+      $facebook_total = _social_stats_facebook($result, $node_path);
     }
 
     // Getting data from Twitter for nodes of selected node type.
