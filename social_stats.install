@@ -142,6 +142,14 @@ function social_stats_schema() {
 }
 
 /**
+ * Implements hook_install().
+ */
+function social_stats_install() {
+  // Set the default time to the start of Unix timestamp.
+  variable_set('social_stats_start_date', 'January 1st, 1970');
+}
+
+/**
  * Implements hook_uninstall().
  */
 function social_stats_uninstall() {
@@ -149,4 +157,5 @@ function social_stats_uninstall() {
   foreach ($node_types as $types) {
     variable_del($types->type);
   }
+  variable_del('social_stats_start_date');
 }

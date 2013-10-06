@@ -118,11 +118,13 @@ function social_stats_cron() {
     }
   }
 
+  $start_date = strtotime(variable_get('social_stats_start_date', '-1 day'));
   // Fetch node id and type for the content types,
   // which has atleast one social media selected.
   $query = db_select('node', 'n')
             ->fields('n', array('nid', 'type'))
             ->condition('n.type', empty($content_types) ? '0' : $content_types)
+            ->condition('n.created', $start_date, '>=')
             ->execute();
   while ($result = $query->fetchObject()) {
     $facebook_total = 0;

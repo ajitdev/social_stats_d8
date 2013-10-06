@@ -9,7 +9,23 @@
  * Settings form to select the social media for content types.
  */
 function social_stats_content_types_form() {
-  $form = array();
+  $form['basic_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Basic Settings'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => FALSE,
+  );
+
+  $form['basic_settings']['social_stats_start_date'] = array(
+    '#title' => t('Start Date'),
+    '#type' => 'textfield',
+    '#maxlength' => 20,
+    '#default_value' => variable_get('social_stats_start_date', '-1 day'),
+    '#description' => t('The oldest date for which the statistics will be retrieved. Enter any valid !url.',
+        array('!url' => l(t('PHP date format'), 'http://www.php.net/manual/en/datetime.formats.php'))),
+  );
+
   $node_types = node_type_get_types();
   $i = 0;
   foreach ($node_types as $types) {
