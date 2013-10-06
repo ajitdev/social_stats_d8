@@ -102,6 +102,45 @@ function _social_stats_facebook($node, $node_path = '') {
 }
 
 /**
+ * Fetch the data from Twitter and save it to local table.
+ *
+ * @param array $node
+ *   Contains $node->nid.
+ * @param string $node_path
+ *   The URL alias.
+ */
+function _social_stats_twitter($node, $node_path = '') {
+  $twitter_shares = 0;
+
+  $tweets_query = 'http://urls.api.twitter.com/1/urls/count.json?url=';
+  $tweets_query .= $node_path;
+  $tweets_response = @drupal_http_request($tweets_query);
+
+  if (!empty($tweets_response->error)) {
+    watchdog(t('Social Stats'),
+      'Problem updating data from Twitter for %node_path. Error: %err',
+      array('%node_path' => $node_path, '%err' => $tweets_response->error),
+      NULL, WATCHDOG_ERROR);
+  }
+  else {
+    $tweets_data = json_decode($tweets_response->data);
+
+    // Only update table if counter > 0
+    $twitter_shares = intval($tweets_data->count);
+    if ($twitter_shares > 0) {
+      db_merge('social_stats_twitter')
+      ->key(array('nid' => $node->nid))
+      ->fields(array(
+        'node_type' => $node->type,
+        'tweets' => $twitter_shares,
+      ))
+      ->execute();
+    }
+  }
+  return $twitter_shares;
+}
+
+/**
  * Implements hook_cron().
  */
 function social_stats_cron() {
@@ -141,19 +180,7 @@ function social_stats_cron() {
 
     // Getting data from Twitter for nodes of selected node type.
     if ($variable['Twitter']) {
-      // Write a query to fetch the data from Twitter.
-      $tweets_query = 'http://urls.api.twitter.com/1/urls/count.json?url=';
-      $tweets_query .= $node_path;
-      $tweets_response = drupal_http_request($tweets_query);
-      $tweets_data = json_decode($tweets_response->data);
-      db_merge('social_stats_twitter')
-      ->key(array('nid' => $result->nid))
-      ->fields(array(
-        'node_type' => $result->type,
-        'tweets' => $tweets_data->count,
-      ))
-      ->execute();
-      $twitter_shares = $tweets_data->count;
+      $twitter_shares = _social_stats_twitter($result, $node_path);
     }
 
     // Getting data from LinkedIn for nodes of selected node type.
