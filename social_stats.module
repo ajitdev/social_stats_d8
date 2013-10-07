@@ -141,6 +141,102 @@ function _social_stats_twitter($node, $node_path = '') {
 }
 
 /**
+ * Fetch the data from LinkedIn and save it to local table.
+ *
+ * @param array $node
+ *   Contains $node->nid.
+ * @param string $node_path
+ *   The URL alias.
+ */
+function _social_stats_linkedin($node, $node_path = '') {
+  $linkedin_shares = 0;
+
+  // Write a query to fetch the data from LinkedIn.
+  $linkedin_query = 'http://www.linkedin.com/countserv/count/share?';
+  $linkedin_query .= 'format=json&url=' . $node_path;
+  $linkedin_response = @drupal_http_request($linkedin_query);
+
+  if (!empty($linkedin_response->error)) {
+    watchdog(t('Social Stats'),
+      'Problem updating data from LinkedIn for %node_path. Error: %err',
+      array('%node_path' => $node_path, '%err' => $tweets_response->error),
+      NULL, WATCHDOG_ERROR);
+  }
+  else {
+    $linkedin_data = json_decode($linkedin_response->data);
+
+    // Only update table if counter > 0
+    $linkedin_shares = intval($linkedin_data->count);
+    if ($linkedin_shares > 0) {
+      db_merge('social_stats_linkedin')
+      ->key(array('nid' => $result->nid))
+      ->fields(array(
+        'node_type' => $result->type,
+        'linkedin_shares' => $linkedin_shares,
+      ))
+      ->execute();
+    }
+  }
+  return $linkedin_shares;
+}
+
+/**
+ * Fetch the data from Google+ and save it to local table.
+ *
+ * @param array $node
+ *   Contains $node->nid.
+ * @param string $node_path
+ *   The URL alias.
+ */
+function _social_stats_googleplus($node, $node_path = '') {
+  $gplus_count = 0;
+
+  // Build the JSON data for the API request.
+  $data['method'] = 'pos.plusones.get';
+  $data['id'] = 'p';
+  $data['params']['nolog'] = TRUE;
+  $data['params']['id'] = $node_path;
+  $data['params']['source'] = 'widget';
+  $data['params']['userId'] = '@viewer';
+  $data['params']['groupId'] = '@self';
+  $data['jsonrpc'] = '2.0';
+  $data['key'] = 'p';
+  $data['apiVersion'] = 'v1';
+
+  $url = 'https://clients6.google.com/rpc?key=AIzaSyCKSbrvQasunBoV16zDH9R33D88CeLr9gQ';
+  $options['data'] = json_encode($data);
+  $options['method'] = 'POST';
+  $options['headers']['Content-Type'] = 'application/json';
+
+  $request = @drupal_http_request($url, $options);
+
+  if (!empty($request->error) || empty($request->data)) {
+    watchdog(t('Social Stats'),
+      'Problem updating data from Google+ for %node_path. Error: %err',
+      array('%node_path' => $node_path, '%err' => $tweets_response->error),
+      NULL, WATCHDOG_ERROR);
+  }
+  else {
+    $request->data = json_decode($request->data);
+    if (isset($request->data->result->metadata->globalCounts->count)) {
+      $gplus_count = intval($request->data->result->metadata->globalCounts->count);
+
+      // Only update table if counter > 0
+      if ($gplus_count > 0) {
+        db_merge('social_stats_gplus')
+        ->key(array('nid' => $result->nid))
+        ->fields(array(
+          'node_type' => $result->type,
+          'plusone' => $gplus_count,
+        ))
+        ->execute();
+      }
+    }
+  }
+  return $gplus_count;
+}
+
+/**
  * Implements hook_cron().
  */
 function social_stats_cron() {
@@ -185,55 +281,12 @@ function social_stats_cron() {
 
     // Getting data from LinkedIn for nodes of selected node type.
     if ($variable['LinkedIn']) {
-      // Write a query to fetch the data from LinkedIn.
-      $linkedin_query = 'http://www.linkedin.com/countserv/count/share?';
-      $linkedin_query .= 'format=json&url=' . $node_path;
-      $linkedin_response = drupal_http_request($linkedin_query);
-      $linkedin_data = json_decode($linkedin_response->data);
-      db_merge('social_stats_linkedin')
-      ->key(array('nid' => $result->nid))
-      ->fields(array(
-        'node_type' => $result->type,
-        'linkedin_shares' => $linkedin_data->count,
-      ))
-      ->execute();
-      $linkedin_shares = $linkedin_data->count;
+      $linkedin_shares = _social_stats_linkedin($result, $node_path);
     }
 
     // Getting data from Google Plus for nodes of selected node type.
     if ($variable['Google Plus']) {
-      // Build the JSON data for the API request.
-      $data['method'] = 'pos.plusones.get';
-      $data['id'] = 'p';
-      $data['params']['nolog'] = TRUE;
-      $data['params']['id'] = $node_path;
-      $data['params']['source'] = 'widget';
-      $data['params']['userId'] = '@viewer';
-      $data['params']['groupId'] = '@self';
-      $data['jsonrpc'] = '2.0';
-      $data['key'] = 'p';
-      $data['apiVersion'] = 'v1';
-
-      $url = 'https://clients6.google.com/rpc?key=AIzaSyCKSbrvQasunBoV16zDH9R33D88CeLr9gQ';
-      $options['data'] = json_encode($data);
-      $options['method'] = 'POST';
-      $options['headers']['Content-Type'] = 'application/json';
-
-      $request = drupal_http_request($url, $options);
-      if (empty($request->error) && !empty($request->data)) {
-        $request->data = json_decode($request->data);
-        if (isset($request->data->result->metadata->globalCounts->count)) {
-          $gplus_count = $request->data->result->metadata->globalCounts->count;
-          db_merge('social_stats_gplus')
-            ->key(array('nid' => $result->nid))
-            ->fields(array(
-              'node_type' => $result->type,
-              'plusone' => $gplus_count,
-            ))
-            ->execute();
-          $google_plusone = $gplus_count;
-        }
-      }
+      $google_plusone = _social_stats_googleplus($result, $node_path);
     }
 
     $count_total = $facebook_total + $twitter_shares;
