@@ -42,7 +42,8 @@ INSTALLATION
 
 3. Modify permissions on the People >> Permissions page.
 
-4. Go to admin/config/social-stats/settings, and select the social sites
+4. Go to admin/config/social-stats/settings, set the date after which
+   you want your data to be fetched. Select the social sites to be tracked
    per content type.
 
 5. Run cron. This will fetch the statistics per node and store it in database.
@@ -67,16 +68,16 @@ features to views.
    descending.
 
 Social Stats Panels module will enable you to have the following additional
-content types to panels panels.
-1. Facebook likes : Number of Facebook likes of the node.
-2. Facebook shares : Number of times the node has been shared on Facebook.
-3. Facebook comments : Number of Facebook comments on the node.
-4. Facebook total : likes + shares + comments
-5. Twitter : Number of times the node has been tweeted.
-6. LinkedIn : Number of times the node has been shared.
-7. Google Plus : Number of times the node has been plus oned.
-8. Total virality : Facebook total + Twitter + LinkedIn + Google Plus.
+content type(s) to panels panels.
+1. Total Shares: Facebook total + Twitter + LinkedIn + Google Plus.
 
-This content types will be visible under "Social Stats" category under
+This content type will be visible under "Social Stats" category under
 "Add content" area on the node view by default. If you wish to add this
 content types in mini panels you have to set the required context of node.
+
+------------------------
+RECOMMENDED MODULE
+------------------------
+Elysia Cron (https://drupal.org/project/elysia_cron) - It can be used to set
+the intervals in which the data can be fetched. Can be set to the time when
+the site is expecting least visitors. This will increase the performance.
