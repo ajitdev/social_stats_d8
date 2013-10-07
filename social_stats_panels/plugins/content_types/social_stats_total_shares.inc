@@ -9,7 +9,7 @@
  */
 
 $plugin = array(
-  'title' => t('Total virality (Facebook total + plus one count + tweets count + linkedin shares'),
+  'title' => t('Total shares across social networks'),
   'content_types' => 'total',
   'single' => TRUE,
   'category' => array('Social Stats'),
