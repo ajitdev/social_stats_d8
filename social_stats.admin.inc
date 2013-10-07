@@ -29,7 +29,6 @@ function social_stats_content_types_form() {
   $node_types = node_type_get_types();
   $i = 0;
   foreach ($node_types as $types) {
-    $variable = variable_get($types->type);
     $form['social_stats'][$i] = array(
       '#type' => 'fieldset',
       '#title' => $types->name,
@@ -44,7 +43,7 @@ function social_stats_content_types_form() {
         t('Google Plus'),
         t('LinkedIn'),
       )),
-      '#default_value' => $variable ? $variable : NULL,
+      '#default_value' => variable_get($types->type, NULL),
     );
     $i++;
   }
