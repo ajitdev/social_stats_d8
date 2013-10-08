@@ -53,8 +53,6 @@ function social_stats_permission() {
  *   The URL alias.
  */
 function _social_stats_facebook($node, $node_path = '') {
-  $facebook_total = 0;
-
   $fql_query  = 'SELECT share_count, like_count, comment_count, total_count ';
   $fql_query .= "FROM link_stat WHERE url='" . $node_path . "'";
 
@@ -70,7 +68,6 @@ function _social_stats_facebook($node, $node_path = '') {
   $request_url = 'https://graph.facebook.com/fql?' . http_build_query($params);
 
   $fql_response = @drupal_http_request($request_url);
-
 
   if (!empty($fql_response->error)) {
     watchdog(t('Social Stats'),
@@ -159,7 +156,7 @@ function _social_stats_linkedin($node, $node_path = '') {
   if (!empty($linkedin_response->error)) {
     watchdog(t('Social Stats'),
       'Problem updating data from LinkedIn for %node_path. Error: %err',
-      array('%node_path' => $node_path, '%err' => $tweets_response->error),
+      array('%node_path' => $node_path, '%err' => $linkedin_response->error),
       NULL, WATCHDOG_ERROR);
   }
   else {
@@ -169,9 +166,9 @@ function _social_stats_linkedin($node, $node_path = '') {
     $linkedin_shares = intval($linkedin_data->count);
     if ($linkedin_shares > 0) {
       db_merge('social_stats_linkedin')
-      ->key(array('nid' => $result->nid))
+      ->key(array('nid' => $node->nid))
       ->fields(array(
-        'node_type' => $result->type,
+        'node_type' => $node->type,
         'linkedin_shares' => $linkedin_shares,
       ))
       ->execute();
@@ -213,7 +210,7 @@ function _social_stats_googleplus($node, $node_path = '') {
   if (!empty($request->error) || empty($request->data)) {
     watchdog(t('Social Stats'),
       'Problem updating data from Google+ for %node_path. Error: %err',
-      array('%node_path' => $node_path, '%err' => $tweets_response->error),
+      array('%node_path' => $node_path, '%err' => $request->error),
       NULL, WATCHDOG_ERROR);
   }
   else {
@@ -224,9 +221,9 @@ function _social_stats_googleplus($node, $node_path = '') {
       // Only update table if counter > 0
       if ($gplus_count > 0) {
         db_merge('social_stats_gplus')
-        ->key(array('nid' => $result->nid))
+        ->key(array('nid' => $node->nid))
         ->fields(array(
-          'node_type' => $result->type,
+          'node_type' => $node->type,
           'plusone' => $gplus_count,
         ))
         ->execute();
