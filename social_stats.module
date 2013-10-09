@@ -252,7 +252,8 @@ function social_stats_cron() {
 
   $start_date = strtotime(variable_get('social_stats_start_date', '-1 day'));
   // Fetch node id and type for the content types,
-  // which has atleast one social media selected.
+  // which has atleast one social media selected and
+  // which are created after the date mentioned in module's configuration.
   $query = db_select('node', 'n')
             ->fields('n', array('nid', 'type'))
             ->condition('n.type', empty($content_types) ? '0' : $content_types)
@@ -264,6 +265,8 @@ function social_stats_cron() {
     $linkedin_shares = 0;
     $google_plusone = 0;
     $variable = variable_get($result->type);
+	
+    // Create absolute node path using the node path.
     $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
 
     // Getting data from Facebook for nodes of the selected node type.
@@ -288,6 +291,7 @@ function social_stats_cron() {
 
     $count_total = $facebook_total + $twitter_shares;
     $count_total += $linkedin_shares + $google_plusone;
+
     // Adding the total data from all above to get total virality.
     db_merge('social_stats_total')
     ->key(array('nid' => $result->nid))
