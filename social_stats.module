@@ -265,7 +265,7 @@ function social_stats_cron() {
     $linkedin_shares = 0;
     $google_plusone = 0;
     $variable = variable_get($result->type);
-	
+
     // Create absolute node path using the node path.
     $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
 

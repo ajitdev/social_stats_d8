@@ -8,14 +8,13 @@
  * required context node being viewed
  */
 
- 
 // Create a plugin which will be displayed on Node view of the panel,
 // or on the panel which has "node being viewed" as a required context.
 $plugin = array(
   'title' => t('Total shares across social networks'),
   'content_types' => 'total',
   'single' => TRUE,
-  'category' => array('Social Stats'), // Create a new category
+  'category' => array('Social Stats'),
   'edit form' => 'social_stats_total_form_edit',
   'render callback' => 'social_stats_total_form_render',
   'required context' => array(new ctools_context_required(t('Node'), 'node')),
