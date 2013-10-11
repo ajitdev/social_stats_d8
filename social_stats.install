@@ -17,13 +17,6 @@ function social_stats_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'node_type' => array(
-        'description' => 'The node type of this node.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'fb_likes' => array(
         'description' => 'Number of facebook likes for this node.',
         'type' => 'int',
@@ -45,6 +38,7 @@ function social_stats_schema() {
         'default' => 0,
       ),
     ),
+    'primary key' => array('nid'),
   );
 
   $schema['social_stats_twitter'] = array(
@@ -55,19 +49,13 @@ function social_stats_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'node_type' => array(
-        'description' => 'The node type of this node.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'tweets' => array(
         'description' => 'Number of times this node has been tweeted.',
         'type' => 'int',
         'default' => 0,
       ),
     ),
+    'primary key' => array('nid'),
   );
 
   $schema['social_stats_gplus'] = array(
@@ -78,19 +66,13 @@ function social_stats_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'node_type' => array(
-        'description' => 'The node type of this node.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'plusone' => array(
         'description' => 'Number of times this node has been plus oned.',
         'type' => 'int',
         'default' => 0,
       ),
     ),
+    'primary key' => array('nid'),
   );
 
   $schema['social_stats_linkedin'] = array(
@@ -101,19 +83,13 @@ function social_stats_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'node_type' => array(
-        'description' => 'The node type of this node.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'linkedin_shares' => array(
         'description' => 'Number of this node has been shared on LinkedIn.',
         'type' => 'int',
         'default' => 0,
       ),
     ),
+    'primary key' => array('nid'),
   );
 
   $schema['social_stats_total'] = array(
@@ -124,19 +100,13 @@ function social_stats_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'node_type' => array(
-        'description' => 'The node type of this node.',
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'total_virality' => array(
         'description' => '(Facebook total + Twitter Shares + LinkedIn Shares + Google plus shares)',
         'type' => 'int',
         'default' => 0,
       ),
     ),
+    'primary key' => array('nid'),
   );
   return $schema;
 }
