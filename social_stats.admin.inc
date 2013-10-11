@@ -35,7 +35,7 @@ function social_stats_content_types_form() {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['social_stats'][$i][$types->type] = array(
+    $form['social_stats'][$i]['social_stats_' . $types->type] = array(
       '#type' => 'checkboxes',
       '#options' => drupal_map_assoc(array(
         t('Facebook'),
@@ -43,7 +43,7 @@ function social_stats_content_types_form() {
         t('Google Plus'),
         t('LinkedIn'),
       )),
-      '#default_value' => variable_get($types->type, NULL),
+      '#default_value' => variable_get('social_stats_' . $types->type, NULL),
     );
     $i++;
   }

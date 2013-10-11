@@ -155,7 +155,7 @@ function social_stats_install() {
 function social_stats_uninstall() {
   $node_types = node_type_get_types();
   foreach ($node_types as $types) {
-    variable_del($types->type);
+    variable_del('social_stats_' . $types->type);
   }
   variable_del('social_stats_start_date');
 }

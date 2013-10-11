@@ -241,7 +241,7 @@ function social_stats_cron() {
   $node_types = node_type_get_types();
   $content_types = array();
   foreach ($node_types as $types) {
-    $variable = variable_get($types->type);
+    $variable = variable_get('social_stats_' . $types->type);
     if ($variable['Facebook']    ||
         $variable['Twitter']     ||
         $variable['Google Plus'] ||
@@ -264,7 +264,7 @@ function social_stats_cron() {
     $twitter_shares = 0;
     $linkedin_shares = 0;
     $google_plusone = 0;
-    $variable = variable_get($result->type);
+    $variable = variable_get('social_stats_' . $result->type);
 
     // Create absolute node path using the node path.
     $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
