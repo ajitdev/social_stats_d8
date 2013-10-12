@@ -21,7 +21,7 @@ function social_stats_content_types_form() {
     '#title' => t('Start Date'),
     '#type' => 'textfield',
     '#maxlength' => 20,
-    '#default_value' => variable_get('social_stats_start_date', '-1 day'),
+    '#default_value' => variable_get('social_stats_start_date', 'January 1st, 1970'),
     '#description' => t('The oldest date for which the statistics will be retrieved. Enter any valid !url.',
         array('!url' => l(t('PHP date format'), 'http://www.php.net/manual/en/datetime.formats.php'))),
   );
