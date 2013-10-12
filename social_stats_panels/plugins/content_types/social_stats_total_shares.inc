@@ -23,16 +23,14 @@ $plugin = array(
  */
 function social_stats_total_form_render($subtype, $conf, $args, &$context) {
   $block = new stdClass();
-  $total_count = db_select('social_stats_total', 't')
-                  ->fields('t')
-                  ->condition('t.nid', $args[0])
-                  ->execute()
-                  ->fetchObject();
-  if ($total_count->total_virality == '1') {
-    $block->content = $total_count->total_virality . ' share';
-  }
-  else {
-    $block->content = $total_count->total_virality . ' shares';
+  $query = db_query('SELECT s.total_virality FROM {social_stats_total} s WHERE s.nid = :current_node_id', array(':current_node_id' => $args[0]));
+  foreach($query as $result) {
+    if($result->total_virality) {
+      $block->content = format_plural($result->total_virality, '1 Share', '@count Shares');
+    }
+    else {
+      $block->content = t('0 Shares');
+    }
   }
   return $block;
 }

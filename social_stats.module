@@ -84,7 +84,6 @@ function _social_stats_facebook($node, $node_path = '') {
         db_merge('social_stats_facebook')
         ->key(array('nid' => $node->nid))
         ->fields(array(
-          'node_type' => $node->type,
           'fb_likes' => intval($facebook_data[0]->like_count),
           'fb_shares' => intval($facebook_data[0]->share_count),
           'fb_comments' => intval($facebook_data[0]->comment_count),
@@ -124,13 +123,10 @@ function _social_stats_twitter($node, $node_path = '') {
 
     // Only update table if counter > 0
     $twitter_shares = intval($tweets_data->count);
-    if ($twitter_shares > 0) {
+    if ($twitter_shares) {
       db_merge('social_stats_twitter')
       ->key(array('nid' => $node->nid))
-      ->fields(array(
-        'node_type' => $node->type,
-        'tweets' => $twitter_shares,
-      ))
+      ->fields(array('tweets' => $twitter_shares))
       ->execute();
     }
   }
@@ -164,13 +160,10 @@ function _social_stats_linkedin($node, $node_path = '') {
 
     // Only update table if counter > 0
     $linkedin_shares = intval($linkedin_data->count);
-    if ($linkedin_shares > 0) {
+    if ($linkedin_shares) {
       db_merge('social_stats_linkedin')
       ->key(array('nid' => $node->nid))
-      ->fields(array(
-        'node_type' => $node->type,
-        'linkedin_shares' => $linkedin_shares,
-      ))
+      ->fields(array('linkedin_shares' => $linkedin_shares))
       ->execute();
     }
   }
@@ -219,13 +212,10 @@ function _social_stats_googleplus($node, $node_path = '') {
       $gplus_count = intval($request->data->result->metadata->globalCounts->count);
 
       // Only update table if counter > 0
-      if ($gplus_count > 0) {
+      if ($gplus_count) {
         db_merge('social_stats_gplus')
         ->key(array('nid' => $node->nid))
-        ->fields(array(
-          'node_type' => $node->type,
-          'plusone' => $gplus_count,
-        ))
+        ->fields(array('plusone' => $gplus_count))
         ->execute();
       }
     }
@@ -293,13 +283,13 @@ function social_stats_cron() {
     $count_total += $linkedin_shares + $google_plusone;
 
     // Adding the total data from all above to get total virality.
-    db_merge('social_stats_total')
-    ->key(array('nid' => $result->nid))
-    ->fields(array(
-      'node_type' => $result->type,
-      'total_virality' => $count_total,
-    ))
-    ->execute();
+    // Update table only when counter > 0
+    if ($count_total) {
+      db_merge('social_stats_total')
+      ->key(array('nid' => $result->nid))
+      ->fields(array('total_virality' => $count_total))
+      ->execute();
+    }
   }
 }
 
