@@ -34,7 +34,7 @@ REQUIREMENTS
 INSTALLATION
 ------------------------
 
-1. Clone the git repo into directory where you keep contributed modules
+1. Download the module and place it with other contributed modules
    (e.g. sites/all/modules/).
 
 2. Enable the Social Stats module on the Modules list page. Appropriate
