@@ -120,4 +120,7 @@ function social_stats_uninstall() {
     variable_del('social_stats_' . $types->type);
   }
   variable_del('social_stats_start_date');
+  variable_del('social_stats_cron_interval');
+  variable_del('social_stats_cron_duration');
+  variable_del('social_stats_next_execution');
 }

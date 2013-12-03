@@ -224,71 +224,95 @@ function _social_stats_googleplus($node, $node_path = '') {
 }
 
 /**
+ * The queue worker function to update the data.
+ */
+function _social_stats_update($result) {
+  $facebook_total = 0;
+  $twitter_shares = 0;
+  $linkedin_shares = 0;
+  $google_plusone = 0;
+  $variable = variable_get('social_stats_' . $result->type);
+
+  // Create absolute node path using the node path.
+  $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
+
+  // Getting data from Facebook for nodes of the selected node type.
+  if ($variable['Facebook']) {
+    $facebook_total = _social_stats_facebook($result, $node_path);
+  }
+
+  // Getting data from Twitter for nodes of selected node type.
+  if ($variable['Twitter']) {
+    $twitter_shares = _social_stats_twitter($result, $node_path);
+  }
+
+  // Getting data from LinkedIn for nodes of selected node type.
+  if ($variable['LinkedIn']) {
+    $linkedin_shares = _social_stats_linkedin($result, $node_path);
+  }
+
+  // Getting data from Google Plus for nodes of selected node type.
+  if ($variable['Google Plus']) {
+    $google_plusone = _social_stats_googleplus($result, $node_path);
+  }
+
+  $count_total = $facebook_total + $twitter_shares;
+  $count_total += $linkedin_shares + $google_plusone;
+
+  // Adding the total data from all above to get total virality.
+  // Update table only when counter > 0
+  if ($count_total) {
+    db_merge('social_stats_total')
+    ->key(array('nid' => $result->nid))
+    ->fields(array('total_virality' => $count_total))
+    ->execute();
+  }
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function social_stats_cron_queue_info() {
+  $queues['social_stats_update_stats'] = array(
+    'worker callback' => '_social_stats_update',
+    'time' => variable_get('social_stats_cron_duration', 300),
+  );
+  return $queues;
+}
+
+/**
  * Implements hook_cron().
  */
 function social_stats_cron() {
-  // Get list of content types in the site.
-  $node_types = node_type_get_types();
-  $content_types = array();
-  foreach ($node_types as $types) {
-    $variable = variable_get('social_stats_' . $types->type);
-    if ($variable['Facebook']    ||
-        $variable['Twitter']     ||
-        $variable['Google Plus'] ||
-        $variable['LinkedIn']) {
-      $content_types[] = $types->type;
-    }
-  }
+  $interval = variable_get('social_stats_cron_interval', 60 * 60 * 24);
+  if (time() >= variable_get('social_stats_next_execution', 0)) {
+    variable_set('social_stats_next_execution', time() + $interval);
 
-  $start_date = strtotime(variable_get('social_stats_start_date', 'January 1st, 1970'));
-  // Fetch node id and type for the content types,
-  // which has atleast one social media selected and
-  // which are created after the date mentioned in module's configuration.
-  $query = db_select('node', 'n')
-            ->fields('n', array('nid', 'type'))
-            ->condition('n.type', empty($content_types) ? '0' : $content_types)
-            ->condition('n.created', $start_date, '>=')
-            ->execute();
-  while ($result = $query->fetchObject()) {
-    $facebook_total = 0;
-    $twitter_shares = 0;
-    $linkedin_shares = 0;
-    $google_plusone = 0;
-    $variable = variable_get('social_stats_' . $result->type);
-
-    // Create absolute node path using the node path.
-    $node_path = url('node/' . $result->nid, array('absolute' => TRUE));
-
-    // Getting data from Facebook for nodes of the selected node type.
-    if ($variable['Facebook']) {
-      $facebook_total = _social_stats_facebook($result, $node_path);
+    // Get list of content types in the site.
+    $node_types = node_type_get_types();
+    $content_types = array();
+    foreach ($node_types as $types) {
+      $variable = variable_get('social_stats_' . $types->type);
+      if ($variable['Facebook']    ||
+          $variable['Twitter']     ||
+          $variable['Google Plus'] ||
+          $variable['LinkedIn']) {
+        $content_types[] = $types->type;
+      }
     }
 
-    // Getting data from Twitter for nodes of selected node type.
-    if ($variable['Twitter']) {
-      $twitter_shares = _social_stats_twitter($result, $node_path);
-    }
-
-    // Getting data from LinkedIn for nodes of selected node type.
-    if ($variable['LinkedIn']) {
-      $linkedin_shares = _social_stats_linkedin($result, $node_path);
-    }
-
-    // Getting data from Google Plus for nodes of selected node type.
-    if ($variable['Google Plus']) {
-      $google_plusone = _social_stats_googleplus($result, $node_path);
-    }
-
-    $count_total = $facebook_total + $twitter_shares;
-    $count_total += $linkedin_shares + $google_plusone;
-
-    // Adding the total data from all above to get total virality.
-    // Update table only when counter > 0
-    if ($count_total) {
-      db_merge('social_stats_total')
-      ->key(array('nid' => $result->nid))
-      ->fields(array('total_virality' => $count_total))
-      ->execute();
+    $start_date = strtotime(variable_get('social_stats_start_date', 'January 1st, 1970'));
+    // Fetch node id and type for the content types,
+    // which has at least one social media selected and
+    // which are created after the date mentioned in module's configuration.
+    $query = db_select('node', 'n')
+              ->fields('n', array('nid', 'type'))
+              ->condition('n.type', empty($content_types) ? '0' : $content_types)
+              ->condition('n.created', $start_date, '>=')
+              ->execute();
+    $queue = DrupalQueue::get('social_stats_update_stats');
+    while ($result = $query->fetchObject()) {
+      $queue->createItem($result);
     }
   }
 }
