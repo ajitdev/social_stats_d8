@@ -44,6 +44,9 @@ function social_stats_views_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_numeric',
     ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_group_by_numeric',
+    ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
