@@ -22,7 +22,7 @@ function social_stats_help($path, $arg) {
  */
 function social_stats_menu() {
   $items['admin/config/services/social-stats/settings'] = array(
-    'title' => 'Social Statistics',
+    'title' => 'Social Stats',
     'description' => 'Administrative settings for social stats module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('social_stats_content_types_form'),
@@ -53,7 +53,7 @@ function social_stats_permission() {
  *   The URL alias.
  */
 function _social_stats_facebook($node, $node_path = '') {
-  $fql_query  = 'SELECT share_count, like_count, comment_count, total_count ';
+  $fql_query  = 'SELECT share_count, like_count, commentsbox_count, total_count ';
   $fql_query .= "FROM link_stat WHERE url='" . $node_path . "'";
 
   // TODO: Implement multi-query
@@ -86,7 +86,7 @@ function _social_stats_facebook($node, $node_path = '') {
         ->fields(array(
           'fb_likes' => intval($facebook_data[0]->like_count),
           'fb_shares' => intval($facebook_data[0]->share_count),
-          'fb_comments' => intval($facebook_data[0]->comment_count),
+          'fb_comments' => intval($facebook_data[0]->commentsbox_count),
           'fb_total' => intval($facebook_data[0]->total_count),
         ))
         ->execute();
