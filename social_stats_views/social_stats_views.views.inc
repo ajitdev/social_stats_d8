@@ -145,10 +145,40 @@ function social_stats_views_views_data() {
     ),
   );
 
-  // Define field, filter and sort type plugins for plusone count.
-  $data['social_stats_gplus']['plusone '] = array(
-    'title' => t('Google plus shares'),
-    'help' => t('Value of times this node has been plus oned on Google Plus.'),
+  // Define field, filter and sort type plugins for plusone total count.
+  $data['social_stats_gplus']['plusone'] = array(
+    'title' => t('Google+ Total Count'),
+    'help' => t('Google+ plusone + Google+ shares.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_group_by_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // Define field, filter and sort type plugins for googleplus plusone.
+  $data['social_stats_gplus']['plusone_like'] = array(
+    'title' => t('Google+ plusone'),
+    'help' => t('Number of times this node has been +1ed.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_group_by_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+  
+  // Define field, filter and sort type plugins for googleplus share count.
+  $data['social_stats_gplus']['plusone_share'] = array(
+    'title' => t('Google+ Share Count'),
+    'help' => t('Number of times this node has been shared on Google+.'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
     ),

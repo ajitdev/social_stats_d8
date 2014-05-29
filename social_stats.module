@@ -179,7 +179,29 @@ function _social_stats_linkedin($node, $node_path = '') {
  *   The URL alias.
  */
 function _social_stats_googleplus($node, $node_path = '') {
-  $gplus_count = 0;
+  
+  $gplus_like_count = _social_stats_googleplus_plusone($node_path);
+  $gplus_share_count = _social_stats_googleplus_share($node_path);
+
+  $gplus_count = $gplus_like_count + $gplus_share_count;
+  // Only update table if counter > 0
+  if ($gplus_count) {
+    db_merge('social_stats_gplus')
+    ->key(array('nid' => $node->nid))
+    ->fields(
+      array(
+        'plusone_share' => $gplus_share_count,
+        'plusone_like' => $gplus_like_count,
+        'plusone' => $gplus_count
+        )
+      )
+    ->execute();
+  }
+  return $gplus_count;
+}
+
+function _social_stats_googleplus_plusone($node_path) {
+  $gplus_like_count = 0;
 
   // Build the JSON data for the API request.
   $data['method'] = 'pos.plusones.get';
@@ -209,18 +231,32 @@ function _social_stats_googleplus($node, $node_path = '') {
   else {
     $request->data = json_decode($request->data);
     if (isset($request->data->result->metadata->globalCounts->count)) {
-      $gplus_count = intval($request->data->result->metadata->globalCounts->count);
-
-      // Only update table if counter > 0
-      if ($gplus_count) {
-        db_merge('social_stats_gplus')
-        ->key(array('nid' => $node->nid))
-        ->fields(array('plusone' => $gplus_count))
-        ->execute();
-      }
+      $gplus_like_count = intval($request->data->result->metadata->globalCounts->count);
     }
   }
-  return $gplus_count;
+  return $gplus_like_count;
+}
+
+function _social_stats_googleplus_share($node_path) {
+  $gplus_share_count = 0;
+
+  $data = "f.req=%5B%22" . $node_path . "%22%2Cnull%5D&";
+  $url = "https://plus.google.com/u/0/ripple/update";
+  
+  $response = drupal_http_request($url, array(
+    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+    'data' => $data,
+    'method' => 'POST',
+  ));
+                        
+  //dsm($response->data);
+  $response->data = substr($response->data,6);
+  $response->data = str_replace(",,",",null,", $response->data);
+  $response->data = str_replace(",,",",null,", $response->data);
+  $result = json_decode($response->data, true);
+
+  $gplus_share_count = $result[0][1][4];
+  return $gplus_share_count;
 }
 
 /**
