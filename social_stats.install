@@ -128,21 +128,21 @@ function social_stats_uninstall() {
 /**
  * Implements hook_update_N().
  */
-function social_stats_update_7001() {
+function social_stats_update_7002() {
   $spec = array(
     'type' => 'int',
-    'description' => "GooglePlus Share",
+    'description' => "GooglePlus Shares",
     'not null' => FALSE,
   );
-  if(!db_field_exists('social_stats_gplus', 'plusone_share')){
-    db_add_field('social_stats_gplus', 'plusone_share', $spec);
+  if (!db_field_exists('social_stats_gplus', 'share')) {
+    db_add_field('social_stats_gplus', 'share', $spec);
   }
-  $specification = array(
+  $spec = array(
     'type' => 'int',
-    'description' => "GooglePlus Like",
+    'description' => "GooglePlus Total",
     'not null' => FALSE,
   );
-  if(!db_field_exists('social_stats_gplus', 'plusone_like')){
-    db_add_field('social_stats_gplus', 'plusone_like', $specification);
+  if (!db_field_exists('social_stats_gplus', 'total')) {
+    db_add_field('social_stats_gplus', 'total', $spec);
   }
 }
