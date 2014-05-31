@@ -341,7 +341,16 @@ function social_stats_cron() {
       }
     }
 
-    $start_date = strtotime(variable_get('social_stats_start_date', 'January 1st, 1970'));
+    $start_date = '';
+    $social_stats_options = variable_get('social_stats_options', 0);
+    if ($social_stats_options == 0) {
+      $start_date = variable_get('social_stats_start_date', '01/01/1970');
+    }
+    elseif ($social_stats_options == 1) {
+      $start_date = variable_get('social_stats_date_offset', '-100 days');
+    }
+
+    $start_date = strtotime($start_date);
     // Fetch node id and type for the content types,
     // which has at least one social media selected and
     // which are created after the date mentioned in module's configuration.

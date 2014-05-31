@@ -9,6 +9,16 @@
  * Settings form to select the social media for content types.
  */
 function social_stats_content_types_form() {
+  drupal_add_library('system', 'ui.datepicker');
+  drupal_add_js("jQuery(document).ready(function(){
+      jQuery('.pickadate').datepicker({
+        dateFormat: 'dd/mm/yy',
+        autoSize: true,
+        inline: true,
+      });
+    });",
+  'inline');
+
   $form['basic_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Basic Settings'),
@@ -18,13 +28,39 @@ function social_stats_content_types_form() {
     '#weight' => -1,
   );
 
+  $form['basic_settings']['social_stats_options'] = array(
+    '#type' => 'radios',
+    '#title' => t('Select options'),
+    '#options' => array('Start Date', 'Offset',),
+    '#default_value' => variable_get('social_stats_options', ''),
+  );
+
   $form['basic_settings']['social_stats_start_date'] = array(
-    '#title' => t('Start Date'),
+    '#title' => t('Start Date (MM/DD/YYYY)'),
     '#type' => 'textfield',
     '#maxlength' => 20,
-    '#default_value' => variable_get('social_stats_start_date', 'January 1st, 1970'),
-    '#description' => t('The oldest date for which the statistics will be retrieved. Enter any valid !url.',
-        array('!url' => l(t('PHP date format'), 'http://www.php.net/manual/en/datetime.formats.php'))),
+    '#attributes' => array('class' => array('pickadate')),
+    '#default_value' => variable_get('social_stats_start_date', '01/01/1970'),
+    '#description' => t('The oldest date from which the statistics would be retrieved.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="social_stats_options"]' => array('value' => 0),
+      ),
+    ),
+  );
+
+  $form['basic_settings']['social_stats_date_offset'] = array(
+    '#title' => t('Date Offset'),
+    '#type' => 'textfield',
+    '#maxlength' => 20,
+    '#size' => 20,
+    '#default_value' => variable_get('social_stats_date_offset', '-100 days'),
+    '#description' => t('The days offset from which the stats would be retrieved.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="social_stats_options"]' => array('value' => 1),
+      ),
+    ),
   );
 
   $form['configuration'] = array(
