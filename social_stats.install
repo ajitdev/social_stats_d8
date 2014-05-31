@@ -115,20 +115,19 @@ function social_stats_schema() {
  * Implements hook_uninstall().
  */
 function social_stats_uninstall() {
-  $node_types = node_type_get_types();
-  foreach ($node_types as $types) {
-    variable_del('social_stats_' . $types->type);
+  $query = db_select('variable', 'v')
+    ->fields('v', array('name'))
+    ->condition('name', db_like('social_stats') . '%', 'LIKE')
+    ->execute();
+  while ($variable = $query->fetchAssoc()) {
+    variable_del($variable['name']);
   }
-  variable_del('social_stats_start_date');
-  variable_del('social_stats_cron_interval');
-  variable_del('social_stats_cron_duration');
-  variable_del('social_stats_next_execution');
 }
 
 /**
  * Implements hook_update_N().
  */
-function social_stats_update_7002() {
+function social_stats_update_7001() {
   $spec = array(
     'type' => 'int',
     'description' => "GooglePlus Shares",
