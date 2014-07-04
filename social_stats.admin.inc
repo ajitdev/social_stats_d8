@@ -6,9 +6,9 @@
  */
 
 /**
- * Settings form to select the social media for content types.
+ * Configuration form for the general settings for Social Stats module.
  */
-function social_stats_content_types_form() {
+function social_stats_general_settings_form($form, &$form_state) {
   drupal_add_library('system', 'ui.datepicker');
   drupal_add_js("jQuery(document).ready(function(){
       jQuery('.pickadate').datepicker({
@@ -41,7 +41,7 @@ function social_stats_content_types_form() {
     '#maxlength' => 20,
     '#attributes' => array('class' => array('pickadate')),
     '#default_value' => variable_get('social_stats_start_date', '01/01/1970'),
-    '#description' => t('The oldest date from which the statistics would be retrieved.'),
+    '#description' => t('The oldest date from which the statistics should be retrieved.'),
     '#states' => array(
       'visible' => array(
         ':input[name="social_stats_options"]' => array('value' => 0),
@@ -55,14 +55,13 @@ function social_stats_content_types_form() {
     '#maxlength' => 20,
     '#size' => 20,
     '#default_value' => variable_get('social_stats_date_offset', '-100 days'),
-    '#description' => t('The days offset from which the stats would be retrieved.'),
+    '#description' => t('The days offset from which the stats should be retrieved.'),
     '#states' => array(
       'visible' => array(
         ':input[name="social_stats_options"]' => array('value' => 1),
       ),
     ),
   );
-
   $form['configuration'] = array(
     '#type' => 'fieldset',
     '#title' => t('Cron configuration'),
@@ -71,7 +70,7 @@ function social_stats_content_types_form() {
   $form['configuration']['social_stats_cron_interval'] = array(
     '#type' => 'select',
     '#title' => t('Cron interval'),
-    '#description' => t('Time after which social data will be collected.'),
+    '#description' => t('Time after which social data should be collected.'),
     '#default_value' => variable_get('social_stats_cron_interval', 60 * 60 * 24),
     '#options' => array(
       60 => t('1 minute'),
@@ -94,7 +93,14 @@ function social_stats_content_types_form() {
     '#size' => 3,
     '#maxlength' => 3,
   );
+  return system_settings_form($form);
+}
 
+
+/**
+ * Configuration form for listing of the content types against the social media.
+ */
+function social_stats_content_types_form() {
   $node_types = node_type_get_types();
   $i = 0;
   foreach ($node_types as $types) {
@@ -102,7 +108,7 @@ function social_stats_content_types_form() {
       '#type' => 'fieldset',
       '#title' => $types->name,
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsed' => FALSE,
     );
     $form['social_stats'][$i]['social_stats_' . $types->type] = array(
       '#type' => 'checkboxes',
