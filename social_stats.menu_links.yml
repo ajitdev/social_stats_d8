@@ -1,0 +1,4 @@
+social_stats.content_types:
+  title: 'Social Stats Content Type Settings'
+  weight: -9
+  route_name: social_stats.content_types
