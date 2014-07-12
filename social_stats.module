@@ -18,35 +18,6 @@ function social_stats_help($path, $arg) {
 }
 
 /**
- * Implements hook_menu().
- */
-function social_stats_menu() {
-  $items['admin/config/services/social-stats'] = array(
-    'title' => 'Social Stats',
-    'type' => MENU_NORMAL_ITEM,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('social_stats_general_settings_form'),
-    'access arguments' => array('administer social stats content types'),
-    'file' => 'social_stats.admin.inc',
-  );
-  $items['admin/config/services/social-stats/general'] = array(
-    'title' => 'Social Stats',
-    'description' => 'Administrative settings for social stats module',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/config/services/social-stats/content-types'] = array(
-    'title' => 'Cron Settings',
-    'type' => MENU_LOCAL_TASK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('social_stats_content_types_form'),
-    'access arguments' => array('administer social stats cron'),
-    'file' => 'social_stats.admin.inc',
-    'weight' => 1,
-  );
-  return $items;
-}
-
-/**
  * Implements hook_permission().
  */
 function social_stats_permission() {
