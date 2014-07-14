@@ -1,4 +1,6 @@
 social_stats.content_types:
   title: 'Social Stats Content Type Settings'
-  weight: -9
+  description: 'Settings for chosing the social networks per content type.'
+  weight: 10
   route_name: social_stats.content_types
+  parent: system.admin_config_services

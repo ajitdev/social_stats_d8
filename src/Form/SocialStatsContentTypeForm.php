@@ -3,20 +3,20 @@
 namespace Drupal\social_stats\Form;
 
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\OptGroup;
 
 class SocialStatsContentTypeForm extends FormBase {
   public function getFormId() {
     return 'social_stats_content_type_form';
   }
   public function buildForm(array $form, array &$form_state) {
-    $node_types = array('node', 'page', 'blog');
+    $node_types = node_type_get_types();
     $i = 0;
+    // $form['#attached']['library'][] = 'system/drupal.system';
     foreach ($node_types as $types) {
       $form['social_stats'][$i] = array(
-        '#type' => 'fieldset',
-        '#title' => $types,
-        '#collapsible' => TRUE,
-        '#collapsed' => FALSE,
+        '#type' => 'fieldgroup',
+        '#title' => $types->name,
       );
       $form['social_stats'][$i]['social_stats_' . $types->type] = array(
         '#type' => 'checkboxes',
@@ -30,10 +30,16 @@ class SocialStatsContentTypeForm extends FormBase {
       );
       $i++;
     }
+    $form['social_stats_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save Settings')
+    );
     return $form;
   }
 
   public function submitForm(array &$form, array &$form_state) {
-
+    echo "<pre>";
+    print_r(node_type_get_types());
+    exit;
   }
 }

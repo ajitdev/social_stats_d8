@@ -1,5 +1,5 @@
 social_stats.content_types:
-  path: '/admin/config/services/social-stats/content-types'
+  path: '/admin/config/services/social-stats'
   defaults:
     _form: '\Drupal\social_stats\Form\SocialStatsContentTypeForm'
   requirements:
