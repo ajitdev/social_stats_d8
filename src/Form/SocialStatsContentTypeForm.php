@@ -3,7 +3,6 @@
 namespace Drupal\social_stats\Form;
 
 use Drupal\Core\Form\FormBase;
-use Drupal\Core\Form\OptGroup;
 
 class SocialStatsContentTypeForm extends FormBase {
   public function getFormId() {
@@ -15,8 +14,9 @@ class SocialStatsContentTypeForm extends FormBase {
     // $form['#attached']['library'][] = 'system/drupal.system';
     foreach ($node_types as $types) {
       $form['social_stats'][$i] = array(
-        '#type' => 'fieldgroup',
+        '#type' => 'details',
         '#title' => $types->name,
+        '#open' => TRUE,
       );
       $form['social_stats'][$i]['social_stats_' . $types->type] = array(
         '#type' => 'checkboxes',
