@@ -1,10 +1,15 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\system\Form\RssFeedsForm.
+ */
+
 namespace Drupal\social_stats\Form;
 
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\ConfigFormBase;
 
-class SocialStatsContentTypeForm extends FormBase {
+class SocialStatsContentTypeForm extends ConfigFormBase {
   public function getFormId() {
     return 'social_stats_content_type_form';
   }
